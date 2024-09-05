@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Politik Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
+            margin: 0;
+            padding: 0;
+        }
+        .main {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 10px;
+        }
+        .soru {
+            margin: 20px auto;
+            width: 80%;
+            padding: 15px;
+            border: 1px solid #ddd;
+            background-color: #fff;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 1.2em;
+        }
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+        }
+        .butonlar {
+            width: 90%;
+            max-width: 400px;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .butonlar:hover {
+            background-color: #45a049;
+        }
+        #resetBtn {
+            width: 90%;
+            max-width: 400px;
+            padding: 12px;
+            background-color: coral;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.2em;
+            display: none;
+            cursor: pointer;
+        }
+        #resetBtn:hover {
+            background-color: darkred;
+        }
+        #compass {
+            display: none;
+            margin: 20px auto;
+            width: 90vw;
+            height: 90vw;
+            max-width: 400px;
+            max-height: 400px;
+            background-color: #fff;
+            border: 2px solid #000;
+            border-radius: 10px;
+        }
+        @media (max-width: 600px) {
+            .soru {
+                font-size: 1em;
+            }
+            .butonlar {
+                font-size: 1em;
+                padding: 8px;
+            }
+            #resetBtn {
+                font-size: 1em;
+                padding: 10px;
+            }
+            #compass {
+                width: 80vw;
+                height: 80vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="main">
+        <div class="soru">
+            <p></p>
+        </div>
+        <div class="button-container">
+            <button class="butonlar bir">Katılıyorum</button>
+            <button class="butonlar iki">Kararsızım</button>
+            <button class="butonlar uc">Katılmıyorum</button>
+            <button class="butonlar dort">Geri al</button>
+        </div>
+        <canvas id="compass" width="400" height="400"></canvas>
+        <button id="resetBtn">Testi Yeniden Başlat</button>
+    </main>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const questions = [{
+                    text: "Asgari ücret işçiyi korur",
+                    axis: "economic",
+                    agreeValue: -1,
+                    disagreeValue: 1
+                },
+                {
+                    text: "Eğitim ücretsiz olmalıdır",
+                    axis: "economic",
+                    agreeValue: -1,
+                    disagreeValue: 1
+                },
+                {
+                    text: "Zenginler çok az vergi ödüyor",
+                    axis: "economic",
+                    agreeValue: -1,
+                    disagreeValue: 1
+                },
+                {
+                    text: "Sosyal yardımlar insanlık için gereklidir",
+                    axis: "economic",
+                    agreeValue: -1,
+                    disagreeValue: 1
+                }, {
+                    text: "İçme suyunun bile paralı olması kabul edilemez",
+                    axis: "economic",
+                    agreeValue: -1,
+                    disagreeValue: 1
+                }, {
+                    text: "Gelecekte vatandaşlık maaşı gibi bir sistem getirilebilir",
+                    axis: "economic",
+                    agreeValue: -1,
+                    disagreeValue: 1
+                }, {
+                    text: "Kira, mazot, gıda gibi ürünlerin bir kısmı sübvanse edilebilir",
+                    axis: "economic",
+                    agreeValue: -1,
+                    disagreeValue: 1
+                }, {
+                    text: "İş adamları sanatçı ve yazarlardan daha kıymetlidir",
+                    axis: "economic",
+                    agreeValue: 1,
+                    disagreeValue: -1
+                }, {
+                    text: "Sahil şeritleri özel firmalara satılmamalıdır",
+                    axis: "economic",
+                    agreeValue: -1,
+                    disagreeValue: 1
+                }, {
+                    text: "Şirketlerin çevreyi mahvetmesini regüle etmek gerekir",
+                    axis: "economic",
+                    agreeValue: -1,
+                    disagreeValue: 1
+                }, {
+                    text: "Devlet olabildiğince harcamalarını kısmalı ve memur almamalıdır",
+                    axis: "economic",
+                    agreeValue: 1,
+                    disagreeValue: -1
+                }, {
+                    text: "Enflasyon işsizlikten daha önemlidir",
+                    axis: "economic",
+                    agreeValue: 1,
+                    disagreeValue: -1
+                }, {
+                    text: "Şirketler sadece kâr amacı gütmemelidir",
+                    axis: "economic",
+                    agreeValue: -1,
+                    disagreeValue: 1
+                }, {
+                    text: "Bütün vatandaşlar sağlık hizmetine ücretsiz ulaşabilmelidir",
+                    axis: "economic",
+                    agreeValue: -1,
+                    disagreeValue: 1
+                }, {
+                    text: "İthalat vergileri yerli üreticiyi korumak için gereklidir",
+                    axis: "economic",
+                    agreeValue: -1,
+                    disagreeValue: 1
+                }, {
+                    text: "Multimilyarderlerden ekstra vergi alınabilir",
+                    axis: "economic",
+                    agreeValue: -1,
+                    disagreeValue: 1
+                }, {
+                    text: "Eşitlik ekonomik büyümeden daha önemlidir",
+                    axis: "economic",
+                    agreeValue: -1,
+                    disagreeValue: 1
+                }, {
+                    text: "İşveren ile işçi arasında çıkar çatışması vardır",
+                    axis: "economic",
+                    agreeValue: -1,
+                    disagreeValue: 1
+                }, {
+                    text: "Keyfi olarak çalışmak istemeyenler işsizlik maaşından faydalanamamalıdır",
+                    axis: "economic",
+                    agreeValue: 1,
+                    disagreeValue: -1
+                }, {
+                    text: "Devlet spor ve sanatın gelişmesi için para harcamalıdır",
+                    axis: "economic",
+                    agreeValue: -1,
+                    disagreeValue: 1
+                }, {
+                    text: "Sendikalar piyasaya zarar vermektedir",
+                    axis: "economic",
+                    agreeValue: 1,
+                    disagreeValue: -1
+                }, {
+                    text: "Sistem sürekli zenginlere hizmet ediyor",
+                    axis: "economic",
+                    agreeValue: -1,
+                    disagreeValue: 1
+                }, {
+                    text: "Devlet istihdam için kamu kuruluşu açabilir",
+                    axis: "economic",
+                    agreeValue: -1,
+                    disagreeValue: 1
+                }, {
+                    text: "Spekülasyon ile para kazanmak ahlaksızlıktır",
+                    axis: "economic",
+                    agreeValue: -1,
+                    disagreeValue: 1
+                }, {
+                    text: "Uluslararası yardımlar para israfıdır",
+                    axis: "economic",
+                    agreeValue: 1,
+                    disagreeValue: -1
+                },
+                // --------------------------------------------------------------------
+                {
+                    text: "Devlet medyaya müdahale etmemelidir",
+                    axis: "authority",
+                    agreeValue: -1,
+                    disagreeValue: 1
+                },
+                {
+                    text: "Cezalar yeterince caydırıcı değil",
+                    axis: "authority",
+                    agreeValue: 1,
+                    disagreeValue: -1
+                },
+                {
+                    text: "Emeklilikte yaş sınırı olmamalıdır",
+                    axis: "authority",
+                    agreeValue: -1,
+                    disagreeValue: 1
+                },
+                {
+                    text: "Bazı suçlar için idam bir seçenek olmalıdır",
+                    axis: "authority",
+                    agreeValue: 1,
+                    disagreeValue: -1
+                },
+                {
+                    text: "Eşcinsellik ahlak dışıdır ve yasaklanmalıdır",
+                    axis: "authority",
+                    agreeValue: 1,
+                    disagreeValue: -1
+                },
+                {
+                    text: "Ülkemde başka bir ülkenin bayrağı dalgalanabilir",
+                    axis: "authority",
+                    agreeValue: -1,
+                    disagreeValue: 1
+                },
+                {
+                    text: "İlköğretim zorunlu olmalıdır",
+                    axis: "authority",
+                    agreeValue: 1,
+                    disagreeValue: -1
+                },
+                {
+                    text: "Ülkeler önce kendi vatandaşlarını düşünmelidir",
+                    axis: "authority",
+                    agreeValue: 1,
+                    disagreeValue: -1
+                },
+                {
+                    text: "Kamu personelleri kılık kıyafette serbest bırakılmalıdır",
+                    axis: "authority",
+                    agreeValue: -1,
+                    disagreeValue: 1
+                },
+                {
+                    text: "Bireysel silahlanma her bireyin hakkıdır",
+                    axis: "authority",
+                    agreeValue: -1,
+                    disagreeValue: 1
+                },
+                {
+                    text: "Hakaret ifade özgürlüğüdür",
+                    axis: "authority",
+                    agreeValue: -1,
+                    disagreeValue: 1
+                },
+                {
+                    text: "Kumar serbestleştirilmelidir",
+                    axis: "authority",
+                    agreeValue: -1,
+                    disagreeValue: 1
+                },
+                {
+                    text: "Rehabilitasyon cezalandırmadan daha iyi bir seçenektir",
+                    axis: "authority",
+                    agreeValue: -1,
+                    disagreeValue: 1
+                },
+                {
+                    text: "Bireysel kullanım amaçlı olsa bile uyuşturucu yasak olmalıdır",
+                    axis: "authority",
+                    agreeValue: 1,
+                    disagreeValue: -1
+                },
+                {
+                    text: "Doktor gözetiminde intihar yasal olmalıdır",
+                    axis: "authority",
+                    agreeValue: -1,
+                    disagreeValue: 1
+                },
+                {
+                    text: "Bir ülke uluslararası toplumun desteğini almadan savaşa girmemelidir",
+                    axis: "authority",
+                    agreeValue: -1,
+                    disagreeValue: 1
+                },
+                {
+                    text: "Fuhuş ve porno reşit insanlara serbest bırakılabilir",
+                    axis: "authority",
+                    agreeValue: -1,
+                    disagreeValue: 1
+                },
+                {
+                    text: "Emniyet kemeri zorunlu olmalıdır",
+                    axis: "authority",
+                    agreeValue: 1,
+                    disagreeValue: -1
+                },
+                {
+                    text: "Sömürüyü engellemek için devlet tüm ekonomiyi kontrol etmelidir",
+                    axis: "authority",
+                    agreeValue: 1,
+                    disagreeValue: -1
+                },
+                {
+                    text: "Çocuklara küçük yaştan itibaren disiplin öğretilmelidir",
+                    axis: "authority",
+                    agreeValue: 1,
+                    disagreeValue: -1
+                },
+                {
+                    text: "Her ülke kendi dinine öncelik vermelidir",
+                    axis: "authority",
+                    agreeValue: 1,
+                    disagreeValue: -1
+                },
+                {
+                    text: "Toplum eskiden daha iyiydi ve gün geçtikçe kötüye gidiyor",
+                    axis: "authority",
+                    agreeValue: 1,
+                    disagreeValue: -1
+                },
+                {
+                    text: "Hükumet hukuka ne olursa olsun müdahale etmemelidir",
+                    axis: "authority",
+                    agreeValue: -1,
+                    disagreeValue: 1
+                },
+                {
+                    text: "Kanunlar yapılırken din referans alınmalıdır",
+                    axis: "authority",
+                    agreeValue: 1,
+                    disagreeValue: -1
+                },
+                {
+                    text: "Sadece suçlular devlet gözetiminden korkar",
+                    axis: "authority",
+                    agreeValue: 1,
+                    disagreeValue: -1
+                },
+            ];
+            let currentQuestion = 0;
+            let economicScore = 0;
+            let authorityScore = 0;
+            const soruElement = document.querySelector('.soru p');
+            const buttonContainer = document.querySelector(
+                '.button-container');
+            const restartBtn = document.getElementById('resetBtn');
+            const compassCanvas = document.getElementById('compass');
+            function showQuestion() {
+                soruElement.innerText =
+                    `Soru ${currentQuestion + 1}: ${questions[currentQuestion].text}`;
+            }
+            showQuestion();
+            function saveAnswer(answer) {
+                const currentQ = questions[currentQuestion];
+                if (answer === "katılıyorum") {
+                    if (currentQ.axis === "economic") economicScore +=
+                        currentQ.agreeValue;
+                    if (currentQ.axis === "authority") authorityScore +=
+                        currentQ.agreeValue;
+                } else if (answer === "katılmıyorum") {
+                    if (currentQ.axis === "economic") economicScore +=
+                        currentQ.disagreeValue;
+                    if (currentQ.axis === "authority") authorityScore +=
+                        currentQ.disagreeValue;
+                }
+                currentQuestion++;
+                if (currentQuestion < questions.length) {
+                    showQuestion();
+                } else {
+                    showResults();
+                }
+            }
+            function goBack() {
+                if (currentQuestion > 0) {
+                    currentQuestion--;
+                    showQuestion();
+                }
+            }
+            function showResults() {
+                drawCompass(economicScore, authorityScore);
+                buttonContainer.classList.add('hidden');
+                compassCanvas.style.display = 'block';
+                restartBtn.style.display = 'block';
+            }
+            function drawCompass(economicScore, authorityScore) {
+                const ctx = compassCanvas.getContext('2d');
+                const width = compassCanvas.width;
+                const height = compassCanvas.height;
+                ctx.clearRect(0, 0, width, height);
+                ctx.fillStyle = 'lightgray';
+                ctx.fillRect(0, 0, width, height);
+                ctx.strokeStyle = 'black';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(width / 2, 0);
+                ctx.lineTo(width / 2, height);
+                ctx.moveTo(0, height / 2);
+                ctx.lineTo(width, height / 2);
+                ctx.stroke();
+                ctx.font = "16px Arial";
+                ctx.fillStyle = "black";
+                ctx.fillText("Ekonomik Sol", 10, height / 2 - 10);
+                ctx.fillText("Ekonomik Sağ", width - 120, height / 2 -
+                    10);
+                ctx.fillText("Otoriter", width / 2 + 10, 20);
+                ctx.fillText("Özgürlükçü", width / 2 + 10, height - 10);
+                const maxScore = questions.filter(q => q.axis ===
+                    "economic").length;
+                const economicOffset = (economicScore / maxScore) * (
+                    width / 2 - 40);
+                const authorityOffset = (authorityScore / maxScore) * (
+                    height / 2 - 40);
+                const x = width / 2 + economicOffset;
+                const y = height / 2 - authorityOffset;
+                ctx.beginPath();
+                ctx.arc(x, y, 10, 0, 2 * Math.PI);
+                ctx.fillStyle = 'red';
+                ctx.fill();
+            }
+            document.querySelector('.bir').addEventListener('click',
+            () => saveAnswer('katılıyorum'));
+            document.querySelector('.iki').addEventListener('click',
+            () => saveAnswer('kararsızım'));
+            document.querySelector('.uc').addEventListener('click',
+            () => saveAnswer('katılmıyorum'));
+            document.querySelector('.dort').addEventListener('click',
+            () => goBack());
+            restartBtn.addEventListener('click', () => {
+                currentQuestion = 0;
+                economicScore = 0;
+                authorityScore = 0;
+                showQuestion();
+                buttonContainer.classList.remove('hidden');
+                compassCanvas.style.display = 'none';
+                restartBtn.style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>
